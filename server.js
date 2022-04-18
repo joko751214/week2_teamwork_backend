@@ -1,62 +1,65 @@
-const http = require("http");
-const mongoose = require("mongoose");
-require("dotenv").config({ path: "./config.env" });
+const http = require('http')
+const mongoose = require('mongoose')
+require('dotenv').config({path: './config.env'})
 
-const headers = require('./headers');
-const { successHandle, errorHandle  } = require('./handles');
-const Post = require('./model/post');
+const headers = require('./headers')
+const {successHandle, errorHandle} = require('./handles')
+const Post = require('./model/post')
+
+const {getPosts} = require('./api/index')
+
+const PORT = process.env.PORT || 3005
 
 const DB = process.env.DATABASE.replace(
-  "<password>",
+  '<password>',
   process.env.DATABASE_PASSWORD
-);
+)
 // 連線資料庫
 mongoose
   .connect(DB)
-  .then(() => console.log("資料庫連線成功"))
-  .catch((err) => console.log(err));
+  .then(() => console.log('資料庫連線成功'))
+  .catch(err => console.log(err))
 
 const requestListener = async (req, res) => {
-  let body = "";
-  req.on("data", (chunk) => (body += chunk));
-  if (req.url === "/posts" && req.method === "GET") {
-    const data = [];
-    successHandle(res, data);
-  } else if (req.url === "/posts" && req.method === "POST") {
+  let body = ''
+  req.on('data', chunk => (body += chunk))
+  if (req.url === '/posts' && req.method === 'GET') {
+    getPosts(res)
+  } else if (req.url === '/posts' && req.method === 'POST') {
     req.on('end', async () => {
       try {
-        const data = JSON.parse(body);
-        const required = ['userName', 'avatar', 'content'];
-        let count = 0;
-        required.forEach((item) => {
+        const data = JSON.parse(body)
+        const required = ['userName', 'avatar', 'content']
+        let count = 0
+        required.forEach(item => {
           if (data[item] === undefined) {
-            errorHandle(res, `屬性「${item}」為必要欄位`);
+            errorHandle(res, `屬性「${item}」為必要欄位`)
           } else if (data[item] === '') {
-            errorHandle(res, `屬性「${item}」不能為空值`);
+            errorHandle(res, `屬性「${item}」不能為空值`)
           } else {
-            count += 1;
+            count += 1
           }
-        });
+        })
         if (count === required.length) {
           const newPost = await Post.create({
             userName: data.userName,
             avatar: data.avatar,
             content: data.content,
-            updateImage: data.updateImage
+            updateImage: data.updateImage,
           })
-          successHandle(res, newPost);
+          successHandle(res, newPost)
         }
-      } catch(error) {
-        errorHandle(res, error.errors);
+      } catch (error) {
+        errorHandle(res, error.errors)
       }
     })
-  } else if (req.url === "/posts" && req.method === "OPTION") {
-    successHandle(res, 'OPTION');
+  } else if (req.url === '/posts' && req.method === 'OPTION') {
+    successHandle(res, 'OPTION')
   } else {
     errorHandle(res, '路由錯誤')
   }
-};
+}
 
-const server = http.createServer(requestListener);
+const server = http.createServer(requestListener)
 
-server.listen(3005);
+server.listen(PORT)
