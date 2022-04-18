@@ -2,6 +2,10 @@ const http = require("http");
 const mongoose = require("mongoose");
 require("dotenv").config({ path: "./config.env" });
 
+const headers = require('./headers');
+const { successHandle, errorHandle  } = require('./handles');
+const Post = require('./model/post');
+
 const DB = process.env.DATABASE.replace(
   "<password>",
   process.env.DATABASE_PASSWORD
@@ -12,32 +16,44 @@ mongoose
   .then(() => console.log("資料庫連線成功"))
   .catch((err) => console.log(err));
 
-const headers = {
-  "Access-Control-Allow-Headers":
-    "Content-Type, Authorization, Content-Length, X-Requested-With", // headers 允許哪些資訊
-  "Access-Control-Allow-Origin": "*", // 允許其他IP造訪
-  "Access-Control-Allow-Methods": "PATCH, POST, GET,OPTIONS,DELETE", // 支援的方法
-  "Content-Type": "application/json",
-};
-
 const requestListener = async (req, res) => {
   let body = "";
   req.on("data", (chunk) => (body += chunk));
   if (req.url === "/posts" && req.method === "GET") {
-    res.writeHead(200, headers);
-    res.end();
-  } else if (req.method === "OPTION") {
-    res.writeHead(200, headers);
-    res.end();
+    const data = [];
+    successHandle(res, data);
+  } else if (req.url === "/posts" && req.method === "POST") {
+    req.on('end', async () => {
+      try {
+        const data = JSON.parse(body);
+        const required = ['userName', 'avatar', 'content'];
+        let count = 0;
+        required.forEach((item) => {
+          if (data[item] === undefined) {
+            errorHandle(res, `屬性「${item}」為必要欄位`);
+          } else if (data[item] === '') {
+            errorHandle(res, `屬性「${item}」不能為空值`);
+          } else {
+            count += 1;
+          }
+        });
+        if (count === required.length) {
+          const newPost = await Post.create({
+            userName: data.userName,
+            avatar: data.avatar,
+            content: data.content,
+            updateImage: data.updateImage
+          })
+          successHandle(res, newPost);
+        }
+      } catch(error) {
+        errorHandle(res, error.errors);
+      }
+    })
+  } else if (req.url === "/posts" && req.method === "OPTION") {
+    successHandle(res, 'OPTION');
   } else {
-    res.writeHead(400, headers);
-    res.write(
-      JSON.stringify({
-        status: "false",
-        message: "路由錯誤",
-      })
-    );
-    res.end();
+    errorHandle(res, '路由錯誤')
   }
 };
 
