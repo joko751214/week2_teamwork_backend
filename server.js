@@ -2,6 +2,8 @@ const http = require("http");
 const mongoose = require("mongoose");
 require("dotenv").config({ path: "./config.env" });
 
+const Post = require('./model/post');
+
 const DB = process.env.DATABASE.replace(
   "<password>",
   process.env.DATABASE_PASSWORD
