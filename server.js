@@ -30,16 +30,18 @@ const requestListener = async (req, res) => {
       try {
         const data = JSON.parse(body)
         const required = ['userName', 'avatar', 'content']
-        let count = 0
-        required.forEach(item => {
-          if (data[item] === undefined) {
-            errorHandle(res, `屬性「${item}」為必要欄位`)
-          } else if (data[item] === '') {
-            errorHandle(res, `屬性「${item}」不能為空值`)
+        let count = 0;
+        for (let x = 0; x < required.length ; x++) {
+          if (data[required[x]] === undefined) {
+            errorHandle(res, `屬性「${required[x]}」為必要欄位`)
+            break;
+          } else if (data[required[x]] === '') {
+            errorHandle(res, `屬性「${required[x]}」不能為空值`);
+            break;
           } else {
             count += 1
           }
-        })
+        }
         if (count === required.length) {
           const newPost = await Post.create({
             userName: data.userName,
