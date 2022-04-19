@@ -3,11 +3,11 @@ const postScheam = new Schema(
   {
     userName: {
       type: String,
-      required: [true, '貼文姓名未填寫'],
+      required: [true, '貼文必須要有 {PATH} 欄位且不能為空值'],
     },
     avatar: {
       type: String,
-      required: [true, '貼文頭像 url 未填寫'],
+      required: [true, '貼文必須要有 {PATH} 欄位且不能為空值'],
     },
     updateImage: {
       type: String,
@@ -20,7 +20,7 @@ const postScheam = new Schema(
     },
     content: {
       type: String,
-      required: [true, '內容未填寫'],
+      required: [true, '貼文必須要有 {PATH} 欄位且不能為空值'],
     },
     likes: {
       type: Number,
