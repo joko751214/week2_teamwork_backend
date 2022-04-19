@@ -31,16 +31,18 @@ const requestListener = async (req, res) => {
         const data = JSON.parse(body)
         const required = ['userName', 'avatar', 'content']
         let count = 0;
-        for (let x = 0; x < required.length ; x++) {
-          if (data[required[x]] === undefined) {
-            errorHandle(res, `屬性「${required[x]}」為必要欄位`)
-            break;
-          } else if (data[required[x]] === '') {
-            errorHandle(res, `屬性「${required[x]}」不能為空值`);
-            break;
-          } else {
-            count += 1
-          }
+        try {
+          required.forEach((item) => {
+            if (data[item] === undefined) {
+              throw `屬性「${item}」為必要欄位`
+            } else if (data[item] === "") {
+              throw `屬性「${item}」不能為空值`
+            } else {
+              count += 1;
+            }
+          });
+        } catch(error) {
+          errorHandle(res, error);
         }
         if (count === required.length) {
           const newPost = await Post.create({
@@ -49,7 +51,7 @@ const requestListener = async (req, res) => {
             content: data.content,
             updateImage: data.updateImage,
           })
-          successHandle(res, newPost)
+          successHandle(res, newPost);
         }
       } catch (error) {
         errorHandle(res, error.errors)
