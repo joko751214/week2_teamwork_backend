@@ -54,7 +54,7 @@ const requestListener = async (req, res) => {
           successHandle(res, newPost);
         }
       } catch (error) {
-        errorHandle(res, error.errors)
+        errorHandle(res, error.errors || '欄位格式不正確')
       }
     })
   } else if (req.url === '/posts' && req.method === 'OPTION') {
