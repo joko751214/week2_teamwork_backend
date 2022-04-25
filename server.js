@@ -23,6 +23,7 @@ mongoose
 const requestListener = async (req, res) => {
   let body = ''
   req.on('data', chunk => (body += chunk))
+
   if (req.url === '/posts' && req.method === 'GET') {
     getPosts(res)
   } else if (req.url === '/posts' && req.method === 'POST') {
@@ -57,9 +58,7 @@ const requestListener = async (req, res) => {
         errorHandle(res, error.errors || '欄位格式不正確')
       }
     })
-  } else if (req.url === '/posts') {
-    successHandle(res, 'OPTION')
-  } else if (req.method === 'OPTION') {
+  } else if (req.url === '/posts' && req.method === 'OPTIONS') {
     optionPosts(res)
   } else {
     errorHandle(res, '路由錯誤')
