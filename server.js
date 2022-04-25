@@ -6,7 +6,7 @@ const headers = require('./headers')
 const {successHandle, errorHandle} = require('./handles')
 const Post = require('./model/post')
 
-const {getPosts} = require('./api/index')
+const {getPosts, optionPosts} = require('./api/index')
 
 const PORT = process.env.PORT || 3005
 
@@ -53,8 +53,10 @@ const requestListener = async (req, res) => {
         errorHandle(res, error.errors)
       }
     })
-  } else if (req.url === '/posts' && req.method === 'OPTION') {
+  } else if (req.url === '/posts') {
     successHandle(res, 'OPTION')
+  } else if (req.method === 'OPTION') {
+    optionPosts(res)
   } else {
     errorHandle(res, '路由錯誤')
   }
